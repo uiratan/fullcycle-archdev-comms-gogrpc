@@ -1,8 +1,12 @@
 package service
 
 import (
+	"context"
+
 	"github.com/devfullcycle/14-gRPC/internal/database"
 	"github.com/devfullcycle/14-gRPC/internal/pb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type CategoryService struct {
@@ -14,4 +18,22 @@ func NewCategoryService(categoryDB *database.Category) *CategoryService {
 	return &CategoryService{
 		CategoryDB: categoryDB,
 	}
+}
+
+func (c *CategoryService) CreateCategory(ctx context.Context, in *pb.CreateCategoryRequest) (*pb.CategoryResponse, error) {
+	category, err := c.CategoryDB.Create(in.GetName(), in.GetDescription())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal, "Unexpected error creating category: %s", err)
+	}
+
+	categoryResponse := &pb.Category{
+		Id:          category.ID,
+		Name:        category.Name,
+		Description: category.Description,
+	}
+
+	return &pb.CategoryResponse{
+		Category: categoryResponse,
+	}, nil
 }
