@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  grpc:
+    container_name: grpc
+    build:
+      context: .
+    volumes:
+      - .:/usr/app
+    ports:
+      - "50051:50051"
+    networks:
+      - grpcnet
+
+networks:
+  grpcnet:
+    driver: bridge

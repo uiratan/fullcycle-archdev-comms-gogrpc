@@ -2,11 +2,15 @@ package main
 
 import (
 	"database/sql"
+	"net"
 
 	"github.com/devfullcycle/14-gRPC/internal/database"
 	"github.com/devfullcycle/14-gRPC/internal/pb"
 	"github.com/devfullcycle/14-gRPC/internal/service"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -21,5 +25,13 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterCategoryServiceServer(grpcServer, categoryService)
-	grpcServer.Serve(nil)
+	reflection.Register(grpcServer)
+
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		panic(err)
+	}
+	if err := grpcServer.Serve(lis); err != nil {
+		panic(err)
+	}
 }
